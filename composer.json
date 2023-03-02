@@ -1,0 +1,41 @@
+{
+  "description": "Unofficial Spot-Hit RESTFul API php library",
+  "name": "pkshetlie/spot-hit-api-lib",
+  "keywords": [
+    "spot-hit",
+    "swagger",
+    "php",
+    "api"
+  ],
+  "homepage": "https://github.com/pkshetlie/spot-hit-api-lib",
+  "license": "MIT",
+  "authors": [
+    {
+      "name": "Pobelle Pierrick",
+      "email": "pierrick.pobelle@gmail.com",
+      "homepage": "https://pierrick.pobelle.com"
+    }
+  ],
+  "require": {
+    "php": ">=7.4",
+    "ext-curl": "*",
+    "ext-json": "*",
+    "ext-mbstring": "*",
+    "guzzlehttp/guzzle": "^7.4.0"
+  },
+  "require-dev": {
+    "phpunit/phpunit": "^4.8",
+    "squizlabs/php_codesniffer": "~2.6"
+  },
+  "autoload": {
+    "psr-4": { "SpotHit\\Client\\" : "lib/" }
+  },
+  "autoload-dev": {
+    "psr-4": { "SpotHit\\Client\\" : "test/" }
+  },
+  "extra": {
+    "branch-alias": {
+      "dev-master": "1.x.x-dev"
+    }
+  }
+}
