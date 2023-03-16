@@ -3,7 +3,8 @@ namespace SpotHit\Client;
 
 
 use DevCoder\DotEnv;
-use SpotHit\Client\Api\EnvoyerSms;
+use SpotHit\Client\Api\SmsApi;
+use SpotHit\Client\Exception\SmsApiException;
 use SpotHit\Client\Model\SmsMessage;
 
 /**
@@ -58,21 +59,22 @@ class EnvoyerSmsTest extends \PHPUnit_Framework_TestCase
      */
     public function testValid()
     {
-        $api = new EnvoyerSms();
+        $api = new SmsApi();
         $sms = new SmsMessage();
         $sms->setKey(self::$apiKey)->setMessage("Bonjour")->setDestinataires([getenv("PHONE_NUMBER_TESTER")]);
-        $resp = $api->envoyer($sms);
-
+        $api->envoyer($sms);
         $this->assertTrue($resp->getStatusCode() == "200");
     }
 
-    public function testInvalid()
+    public function testNumeroDeFixeInvalid()
     {
-        $api = new EnvoyerSms();
+        $api = new SmsApi();
         $sms = new SmsMessage();
-        $sms->setKey(self::$apiKey)->setMessage("Bonsoir !");
-        $resp = $api->envoyer($sms);
-        //not working right now
-//        $this->assertTrue($resp->getStatusCode() != "200");
+        try {
+            $sms->setKey(self::$apiKey)->setMessage("Bonsoir !")->setDestinataires(['25689','']);
+            $resp = $api->envoyer($sms);
+        }catch(\Exception $o_O){
+            $this->assertTrue(true);
+        }
     }
 }

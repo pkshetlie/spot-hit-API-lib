@@ -2,63 +2,8 @@
 
 namespace SpotHit\Client\Model;
 
-use SpotHit\Client\Helper\TelephoneHelper;
-
-class SmsMessage extends BaseMessage
+class EmailMessage extends BaseMessage
 {
-    /** @var ?int[]
-     * obligatoire pour l'envoi échelonné
-     * Heure(s) d'envois
-     * Tableau avec 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19
-     * La campagne sera fractionnée proportionnellement aux nombres de créneaux entre le jour et l'heure de démarrage, et le jour et l'heure de fin souhaitée.
-     */
-    private ?array $creneaux;
-    /** @var ?int
-     * obligatoire pour l'envoi échelonné
-     * 1,2,3,4 ou 6 Nombre d'envois par heure
-     */
-    private ?int $creneaux_heure;
-    /** @var ?string
-     * Date d'envoi du message (format timestamp)
-     */
-    private ?string $date;
-    /** @var ?string
-     * obligatoire pour l'envoi échelonné
-     * Date de début d'envoi des messages (format timestamp)
-     */
-    private ?string $date_debut;
-    /** @var ?string
-     * obligatoire pour l'envoi échelonné
-     * Date de fin d'envoi des messages (format timestamp)
-     */
-    private ?string $date_fin;
-    /** @var string[]
-     * Liste de numéros de vos destinataires
-     */
-    private array $destinataires;
-    /** @var ?string "all" | "groupe" | "datas"
-     * Permet la sélection de contacts déjà enregistrés sur le compte client :
-     * all = sélection de tous les contacts du compte.
-     * groupe = sélection de tous les contacts des groupes fournis dans le champ « destinataires » (un tableau contenant les identifiants des groupes est requis)
-     * datas = permet d'ajouter des données personnalisées aux « destinataires » pour les utiliser dans votre message (exemple : "Bonjour {nom} {prenom}"), pour ce faire il faut que le champ
-     * « destinataires » soit un tableau de cette forme : ["+33600000001" => ["nom" => "Nom 1", "prenom" => "Prénom 1"], "+33600000002" => ["nom" => "Nom 2", "prenom" => "Prénom 2"] ...]
-     */
-    private ?string $destinataires_type;
-    /** @var ?string
-     * si égal à "auto", conversion de votre message en UTF-8 (il est conseillé de convertir votre message en UTF-8 dans votre application cependant si votre message reste coupé après un caractère accentué, vous pouvez activer ce paramètre).
-     * si égal à "ucs2", conversion de votre message en unicode (vous pouvez utiliser des caractères supplémentaires comme « ê » qui n'est pas pris en compte en SMS standard, ainsi qu'inclure des emojis. Attention : Le nombre de caractères est limité à 70, et 67 en SMS Long.)
-     */
-    private ?string $encodage;
-    /** @var ?string
-     * 11 caractères maximum (espaces inclus)
-     */
-    private ?string $expediteur;
-    /** @var ?int[]
-     * obligatoire pour l'envoi échelonné
-     * Tableau avec 1,2,3,4,5,6
-     * Jours d'envoi (1 représentant lundi). Pas d'envoi le dimanche.
-     */
-    private ?array $jours;
     /**
      * @var string
      * Limité à 160 caractères (ou voir paramètre smslong).
@@ -68,33 +13,102 @@ class SmsMessage extends BaseMessage
      * Pour rappel, afin de respecter les obligations légales de la CNIL, il est impératif d'inclure une mention de désinscription. Afin que votre campagne soit validée, il vous faut inclure la mention « STOP au 36200 » dans votre message.
      */
     private string $message;
-    /** @var ?string
-     * Cette information non visible par les destinataires vous permet d’identifier votre campagne (maximum 255 caractères).
+
+    /** @var string[]
+     * Liste de numéros de vos destinataires
      */
-    private ?string $nom;
+    private array $destinataires;
+
+    /** @var ?string
+     * 11 caractères maximum (espaces inclus)
+     */
+    private ?string $expediteur;
+
+    /** @var ?string
+     * Date d'envoi du message (format timestamp)
+     */
+    private ?string $date;
+
     /** @var ?int
      * Si égal à "1", autorise l'envoi de SMS supérieur à 160 caractères. Un SMS vous sera facturé tous les 153 caractères.
      * Exemple : pour un message de 300 caractères à 1000 destinataires, 2000 SMS vous seront débités.
      * Maximum 9 SMS concaténés (soit 1377 caractères)
      */
     private ?int $smslong;
+
     /** @var ?int
      * Permet de vérifier la taille du SMS long envoyé. Vous devez envoyer le nombre de SMS concaténés comme valeur. Si notre compteur nous indique un nombre différent, votre message sera rejeté.
      */
     private ?int $smslongnbr;
+
+    /** @var ?int
+     * Si égal à "1", tronque automatiquement le message à 160 caractères.
+     */
+    private ?int $tronque;
+
+    /** @var ?string
+     * si égal à "auto", conversion de votre message en UTF-8 (il est conseillé de convertir votre message en UTF-8 dans votre application cependant si votre message reste coupé après un caractère accentué, vous pouvez activer ce paramètre).
+    si égal à "ucs2", conversion de votre message en unicode (vous pouvez utiliser des caractères supplémentaires comme « ê » qui n'est pas pris en compte en SMS standard, ainsi qu'inclure des emojis. Attention : Le nombre de caractères est limité à 70, et 67 en SMS Long.)
+     */
+    private ?string $encodage;
+
+    /** @var ?string
+     * Cette information non visible par les destinataires vous permet d’identifier votre campagne (maximum 255 caractères).
+     */
+    private ?string $nom;
+
+    /** @var ?string "all" | "groupe" | "datas"
+     * Permet la sélection de contacts déjà enregistrés sur le compte client :
+     * all = sélection de tous les contacts du compte.
+     * groupe = sélection de tous les contacts des groupes fournis dans le champ « destinataires » (un tableau contenant les identifiants des groupes est requis)
+     * datas = permet d'ajouter des données personnalisées aux « destinataires » pour les utiliser dans votre message (exemple : "Bonjour {nom} {prenom}"), pour ce faire il faut que le champ
+     * « destinataires » soit un tableau de cette forme : ["+33600000001" => ["nom" => "Nom 1", "prenom" => "Prénom 1"], "+33600000002" => ["nom" => "Nom 2", "prenom" => "Prénom 2"] ...]
+     */
+    private ?string $destinataires_type;
+
+    /** @var ?string
+     * Adresse URL de votre serveur pour la réception en "push" des statuts après l'envoi. Vous devez déjà avoir une adresse paramétrée sur votre compte pour activer les retours "push". Si ce paramètre est renseigné, cette URL sera appelée pour cet envoi sinon l'adresse du compte est utilisée.
+     */
+    private ?string $urlOptionnel;
+
+    /** @var ?string
+     * obligatoire pour l'envoi échelonné
+     * Date de début d'envoi des messages (format timestamp)
+     */
+    private ?string $date_debut;
+
+    /** @var ?string
+     * obligatoire pour l'envoi échelonné
+     * Date de fin d'envoi des messages (format timestamp)
+     */
+    private ?string $date_fin;
+
+    /** @var ?int[]
+     * obligatoire pour l'envoi échelonné
+     * Heure(s) d'envois
+     * Tableau avec 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19
+     * La campagne sera fractionnée proportionnellement aux nombres de créneaux entre le jour et l'heure de démarrage, et le jour et l'heure de fin souhaitée.
+     */
+    private ?array $creneaux;
+
+    /** @var ?int
+     * obligatoire pour l'envoi échelonné
+     * 1,2,3,4 ou 6 Nombre d'envois par heure
+     */
+    private ?int $creneaux_heure;
+    
+    /** @var ?int[]
+     * obligatoire pour l'envoi échelonné
+     * Tableau avec 1,2,3,4,5,6
+     * Jours d'envoi (1 représentant lundi). Pas d'envoi le dimanche.
+     */
+    private ?array $jours;
+
     /** @var ?string
      * Permet de modifier le fuseau horaire.
      * Par défaut : Europe/Paris
      */
     private ?string $timezone;
-    /** @var ?int
-     * Si égal à "1", tronque automatiquement le message à 160 caractères.
-     */
-    private ?int $tronque;
-    /** @var ?string
-     * Adresse URL de votre serveur pour la réception en "push" des statuts après l'envoi. Vous devez déjà avoir une adresse paramétrée sur votre compte pour activer les retours "push". Si ce paramètre est renseigné, cette URL sera appelée pour cet envoi sinon l'adresse du compte est utilisée.
-     */
-    private ?string $urlOptionnel;
 
     /**
      * @return string
@@ -124,19 +138,10 @@ class SmsMessage extends BaseMessage
 
     /**
      * @param string[] $destinataires
-     * @param bool $checkNumero
      * @return SmsMessage
-     * @throws \Exception
      */
-    public function setDestinataires(array $destinataires, bool $checkNumero = true): SmsMessage
+    public function setDestinataires(array $destinataires): SmsMessage
     {
-        if ($checkNumero) {
-            foreach ($destinataires as $destinataire) {
-                if (!TelephoneHelper::validateMobileNumber($destinataire)) {
-                    throw new \Exception($destinataire . " n'est pas reconnu comme numéro valide");
-                }
-            }
-        }
         $this->destinataires = $destinataires;
         return $this;
     }
@@ -421,5 +426,5 @@ class SmsMessage extends BaseMessage
         }
         return $r;
     }
-
+    
 }
